@@ -1,59 +1,70 @@
 import javafx.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
-/**
- * Created by jphan on 4/9/17.
- */
 public class Tuple {
-    private ArrayList<ArrayList<Pair<String,String>>> tupleList;
+    private ArrayList<Pair<String, String>> tuple;
 
-    public Tuple(){
-        tupleList = new ArrayList<ArrayList<Pair<String, String> > >();
-    }
-
-    public Tuple(String tupleString){
-        tupleList = new ArrayList<ArrayList<Pair<String, String> > >();
-        add(tupleString);
-
-    }
-
-    public void add(String tupleString){
-        ArrayList<Pair<String, String>> list = new ArrayList<Pair<String, String> >();
+    public Tuple(String tupleString) {
+        tuple = new ArrayList<Pair<String, String>>();
         String[] split = tupleString.split(",");
-        for(String s: split){
-            list.add(determineType(s));
+        for (String s : split) {
+            tuple.add(determineType(s));
         }
-        tupleList.add(list);
     }
 
-    public Pair<String,String> determineType(String string){
+    public Pair<String, String> determineType(String string) {
         String type;
-        if(string.contains("."))
-            type = "Double";
-        else if(string.contains("\""))
-            type = "String";
+        if (string.contains("."))
+            type = "float";
+        else if (string.contains("\""))
+            type = "string";
+        else if (string.contains("?"))
+            type = "variable";
         else
-            type = "Integer";
-        return new Pair<>(string,type);
+            type = "int";
+        return new Pair<>(string, type);
 
     }
-
-    public void search(){
-        //todo Implement me
+    public int getSize(){
+        return tuple.size();
     }
 
-    public void print(){
-        System.out.println(tupleList.toString());
+    public Pair<String, String> get(int index){
+        return tuple.get(index);
     }
 
-    public static void main(String[] args){
-        String s;
-        Scanner scan = new Scanner(System.in);
-        System.out.print("Enter Tuple:");
-        s = scan.nextLine();
-        Tuple t = new Tuple(s);
-        t.print();
+    public boolean equals(Tuple tuple){
+//        System.out.println("here");
+        if(tuple.getSize() != this.getSize())
+            return false;
+        for(int i=0; i< this.getSize(); i++){
+//            System.out.println("tuple.get(i).getValue() = " + tuple.get(i).getValue());
+            if (tuple.get(i).getValue().equals("variable")){
+                String variableRequired = tuple.get(i).getKey();
+//                System.out.println("variableRequired = " + variableRequired);
+                variableRequired = variableRequired.split(":")[1];
+//                System.out.println("variableRequired = " + variableRequired);
+                if(!this.tuple.get(i).getValue().equals(variableRequired))      {
+                    return false;
+                }
+            }else if(!this.tuple.get(i).getKey().equals(tuple.get(i).getKey()))    // checks if Key is the same
+                return false;
+
+        }
+        return true;
+    }
+
+    @Override
+    public String toString(){
+        String string = "";
+        for(int i=0;i<tuple.size(); i++){
+            string += tuple.get(i).getKey();
+            if(i != tuple.size()-1){
+                string +=",";
+            }
+
+        }
+        return string;
     }
 }

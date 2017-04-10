@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Host {
+    private final static String salt="DGE$5SGr@3VsHYUMas2323E4d57vfBfFSTRU@!DSH(*%FDSdfg13sgfsg";
     private Scanner scanner;
     private InetAddress ip;
     private ServerSocket listener;
@@ -272,34 +273,45 @@ public class Host {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            new Host();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+    public static int getHashHost(String message, int numHosts){
+        String hashedString = md5Hash(message);
+        return hex2decimal(hashedString)%numHosts;
     }
+
 
     /**
      * Takes a string, and converts it to md5 hashed string.
      */
     public static String md5Hash(String message) {
         String md5 = "";
-        if (null == message)
+        if(null == message)
             return null;
 
-        //message = message+salt;//adding a salt to the string before it gets hashed.  todo Do we need a salt?
+        message = message+salt;//adding a salt to the string before it gets hashed.
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");//Create MessageDigest object for MD5
             digest.update(message.getBytes(), 0, message.length());//Update input string in message digest
             md5 = new BigInteger(1, digest.digest()).toString(16);//Converts message digest value in base 16 (hex)
-
+//            System.out.println(hex2decimal(md5)%3);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return md5;
     }
 
+    public static int hex2decimal(String s) {
+        String digits = "0123456789ABCDEF";
+        s = s.toUpperCase();
+        int val = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            int d = digits.indexOf(c);
+            val = 16*val + d;
+        }
+        if( val < 0 ) val *=-1;
+        return val;
+    }
 
 }
 
