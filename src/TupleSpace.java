@@ -23,19 +23,26 @@ public class TupleSpace {
         tupleList.add(new Tuple(tupleString));
     }
 
+    public void remove(int index){
+        tupleList.remove(index);
+    }
 
-    public void search(String input) {
+    public Tuple get(int index){
+        return tupleList.get(index);
+    }
+
+    public int search(String input) {
         Tuple findThis = new Tuple(input);
         for (int i = 0; i < tupleList.size(); i++) {
             if (tupleList.get(i).equals(findThis)) {
                 System.out.println("Found!");
                 System.out.println(i);
                 System.out.println("tupleList.get(i) = " + tupleList.get(i).toString());
-                break;
+                return i;
             }
 
         }
-
+        return -1;
     }
 
     public void print() {
