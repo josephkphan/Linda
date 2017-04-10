@@ -222,6 +222,15 @@ public class Host {
      * distributed system.
      */
     private void lindaIn(String input) {
+        //todo Hash here
+
+        //todo request from a a specific host OR broadcast
+
+
+//        isBlocking = true;
+//        while(isBlocking){
+//            //Blocking code to wait for input
+//        }
 
     }
 
