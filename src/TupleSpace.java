@@ -1,11 +1,6 @@
-import javafx.util.Pair;
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- * Created by jphan on 4/9/17.
- */
 public class TupleSpace {
     private ArrayList<Tuple> tupleList;
 
@@ -23,11 +18,11 @@ public class TupleSpace {
         tupleList.add(new Tuple(tupleString));
     }
 
-    public void remove(int index){
+    public void remove(int index) {
         tupleList.remove(index);
     }
 
-    public Tuple get(int index){
+    public Tuple get(int index) {
         return tupleList.get(index);
     }
 
