@@ -1,10 +1,12 @@
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+/**
+ * Data Structure that holds a list of HostInfo. Base uses Arraylist
+ */
 public class HostInfoList {
-    ArrayList<HostInfo> hostList;
+    private ArrayList<HostInfo> hostList;
 
     public HostInfoList() {
         hostList = new ArrayList<HostInfo>();
@@ -18,6 +20,9 @@ public class HostInfoList {
         hostList.add(new HostInfo(hostInfoString));
     }
 
+    /**
+     * Checks whether the host list has a certain ID or not
+     */
     public boolean contains(String hostInfoString, int id) {
         for (HostInfo h : hostList) {
             if (h.equals(new HostInfo(hostInfoString, id))) {
@@ -31,12 +36,19 @@ public class HostInfoList {
         return hostList.get(index);
     }
 
+    /**
+     * Search HostInfo List by Host ID
+     */
     public HostInfo getByID(int ID) {
         for (HostInfo h : hostList) {
             if (h.getId() == ID)
                 return h;
         }
         return null;
+    }
+
+    public void remove(){
+        //todo Implement me! Part 2
     }
 
     public int size() {
@@ -47,26 +59,32 @@ public class HostInfoList {
         hostList.clear();
     }
 
-    public void print(){
-        for (HostInfo h: hostList){
+    /**
+     * Prints out Host List onto Standard Out
+     */
+    public void print() {
+        for (HostInfo h : hostList) {
             System.out.println(h.toString());
         }
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         String string = "";
-        for (HostInfo h: hostList){
+        for (HostInfo h : hostList) {
             string += h.toString();
-            string +="/";
+            string += "/";
         }
         return string;
     }
 
-    public void writeToFile(String hostname){
-        try{
+    /**
+     * Writes Host List to a file
+     */
+    public void save(String hostname) {
+        try {
             PrintWriter writer = new PrintWriter(hostname + "-nets.txt", "UTF-8");
-            for (HostInfo h: hostList){
+            for (HostInfo h : hostList) {
                 writer.println(h.toString());
             }
             writer.close();

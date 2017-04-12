@@ -1,4 +1,6 @@
-
+/**
+ * Wills Host info - Host name, ID, ip address, and port number
+ */
 public class HostInfo {
     private String hostName, iPAddress;
     private int portNumber, id;

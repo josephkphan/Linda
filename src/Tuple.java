@@ -1,7 +1,10 @@
 import javafx.util.Pair;
-
 import java.util.ArrayList;
 
+/**
+ * Java Implementation of a Tuple. Used ArrayList of Pairs.
+ * Each Pair contains a String as the key (which is the tuple value), and the tuple type as the Pair-value
+ */
 public class Tuple {
     private ArrayList<Pair<String, String>> tuple;
 
@@ -13,6 +16,10 @@ public class Tuple {
         }
     }
 
+    /**
+     * This Tuple Class only has 3 types: String, Variable, or Integer
+     * "Variable" are used for the Tuple search so it does not need to put a specific value - just the type
+     */
     public Pair<String, String> determineType(String string) {
         String type;
         if (string.contains("."))
@@ -26,29 +33,31 @@ public class Tuple {
         return new Pair<>(string, type);
 
     }
-    public int getSize(){
+
+    public int getSize() {
         return tuple.size();
     }
 
-    public Pair<String, String> get(int index){
+    public Pair<String, String> get(int index) {
         return tuple.get(index);
     }
 
-    public boolean equals(Tuple tuple){
-//        System.out.println("here");
-        if(tuple.getSize() != this.getSize())
+    /**
+     * Checks whether Two Tuples are the same or not.
+     * if is it a variable parameter, it will check the type rather than the actual value
+     */
+    public boolean equals(Tuple tuple) {
+        if (tuple.getSize() != this.getSize())          // Checks if the Tuple has the same number of elements
             return false;
-        for(int i=0; i< this.getSize(); i++){
-//            System.out.println("tuple.get(i).getValue() = " + tuple.get(i).getValue());
-            if (tuple.get(i).getValue().equals("variable")){
+
+        for (int i = 0; i < this.getSize(); i++) {      // Checks whether it is a variable parameter or not
+            if (tuple.get(i).getValue().equals("variable")) {
                 String variableRequired = tuple.get(i).getKey();
-//                System.out.println("variableRequired = " + variableRequired);
                 variableRequired = variableRequired.split(":")[1];
-//                System.out.println("variableRequired = " + variableRequired);
-                if(!this.tuple.get(i).getValue().equals(variableRequired))      {
+                if (!this.tuple.get(i).getValue().equals(variableRequired)) {
                     return false;
                 }
-            }else if(!this.tuple.get(i).getKey().equals(tuple.get(i).getKey()))    // checks if Key is the same
+            } else if (!this.tuple.get(i).getKey().equals(tuple.get(i).getKey()))    // Checks if Key is the same
                 return false;
 
         }
@@ -56,12 +65,12 @@ public class Tuple {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         String string = "";
-        for(int i=0;i<tuple.size(); i++){
+        for (int i = 0; i < tuple.size(); i++) {
             string += tuple.get(i).getKey();
-            if(i != tuple.size()-1){
-                string +=",";
+            if (i != tuple.size() - 1) {
+                string += ",";
             }
 
         }

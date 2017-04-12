@@ -1,8 +1,10 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Scanner;
 
+/**
+ * Data Structure that Contains Tuples. Uses ArrayList as Base.
+ */
 public class TupleSpace {
     private ArrayList<Tuple> tupleList;
 
@@ -28,13 +30,13 @@ public class TupleSpace {
         return tupleList.get(index);
     }
 
+    /**
+     * Returns the tuple that matches the input
+     */
     public int search(String input) {
         Tuple findThis = new Tuple(input);
         for (int i = 0; i < tupleList.size(); i++) {
             if (tupleList.get(i).equals(findThis)) {
-                System.out.println("Found!");
-                System.out.println(i);
-                System.out.println("tupleList.get(i) = " + tupleList.get(i).toString());
                 return i;
             }
 
@@ -46,32 +48,23 @@ public class TupleSpace {
         System.out.println(tupleList.toString());
     }
 
-    public static void main(String[] args) {
-        String s;
-        Scanner scan = new Scanner(System.in);
-        System.out.print("Enter Tuple:");
-        s = scan.nextLine();
-        TupleSpace ts = new TupleSpace();
-        ts.add(s);
-        ts.print();
-        System.out.print("Enter Search Tuple");
-        s = scan.nextLine();
-        ts.search(s);
-    }
 
     public ArrayList<Tuple> getTupleList() {
         return tupleList;
     }
 
-    public int size(){
+    public int size() {
         return tupleList.size();
     }
 
-    public void writeToFile(String hostname){
-        try{
+    /**
+     * Writes Tuple Space to a file
+     */
+    public void save(String hostname) {
+        try {
             PrintWriter writer = new PrintWriter(hostname + "-tuples.txt", "UTF-8");
 
-            for (Tuple t: tupleList){
+            for (Tuple t : tupleList) {
                 writer.println(t.toString());
             }
             writer.close();
@@ -79,4 +72,5 @@ public class TupleSpace {
             // do something
         }
     }
+
 }
