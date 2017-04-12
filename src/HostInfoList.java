@@ -66,7 +66,6 @@ public class HostInfoList {
     public void writeToFile(String hostname){
         try{
             PrintWriter writer = new PrintWriter(hostname + "-nets.txt", "UTF-8");
-
             for (HostInfo h: hostList){
                 writer.println(h.toString());
             }

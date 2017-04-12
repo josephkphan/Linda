@@ -59,6 +59,14 @@ public class TupleSpace {
         ts.search(s);
     }
 
+    public ArrayList<Tuple> getTupleList() {
+        return tupleList;
+    }
+
+    public int size(){
+        return tupleList.size();
+    }
+
     public void writeToFile(String hostname){
         try{
             PrintWriter writer = new PrintWriter(hostname + "-tuples.txt", "UTF-8");
