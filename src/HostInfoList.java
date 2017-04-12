@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -59,5 +61,18 @@ public class HostInfoList {
             string +="/";
         }
         return string;
+    }
+
+    public void writeToFile(String hostname){
+        try{
+            PrintWriter writer = new PrintWriter(hostname + "-nets.txt", "UTF-8");
+
+            for (HostInfo h: hostList){
+                writer.println(h.toString());
+            }
+            writer.close();
+        } catch (IOException e) {
+            // do something
+        }
     }
 }

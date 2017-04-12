@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -55,5 +57,18 @@ public class TupleSpace {
         System.out.print("Enter Search Tuple");
         s = scan.nextLine();
         ts.search(s);
+    }
+
+    public void writeToFile(String hostname){
+        try{
+            PrintWriter writer = new PrintWriter(hostname + "-tuples.txt", "UTF-8");
+
+            for (Tuple t: tupleList){
+                writer.println(t.toString());
+            }
+            writer.close();
+        } catch (IOException e) {
+            // do something
+        }
     }
 }
