@@ -4,3 +4,4 @@ run:
 	java P1
 clean:
 	rm *.class
+	rm *.txt
