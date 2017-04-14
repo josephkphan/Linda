@@ -1,4 +1,3 @@
-import javafx.util.Pair;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,10 +10,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class Host {
     private final static String salt = "DGE$5SGr@3VsHYUMas2323E4d57vfBfFSTRU@!DSH(*%FDSdfg13sgfsg";     // md5 salt
+    private final static int START = 1025;
+    private final static int END = 65525;
     private ServerSocket listener;                      // Used to accept other socket connections
     private String yourName;                            // Your host name
     private InetAddress ip;                             // Your IP Address
@@ -23,24 +25,25 @@ public class Host {
     private TupleSpace tupleSpace;                      // Used to store Tuples
     private ArrayList<Pair<String, Socket>> requests;   // Saves all in and read requests
     private HostInfoList hostInfoList;                  // Contains all Host Information
+    private String myRequest;                           // saves your last request
 
-    public Host() {
+    public Host(String hostName) {
         // Initializing Variables
         tupleSpace = new TupleSpace();
         hostInfoList = new HostInfoList();
         requests = new ArrayList<>();
         isBlocking = false;
 
-        setUp();
+        setUp(hostName);
         startLindaCommandPrompt();
     }
 
     /**
      * Set up servers. Determines which port is unused
      */
-    private void setUp() {
-        getHostName();
-        findAvailablePort();
+    private void setUp(String hostName) {
+        getHostName(hostName);
+//        findAvailablePort();
         createServerSocket();
         getIPAddress();
         displayIPAddress();
@@ -52,21 +55,11 @@ public class Host {
     /**
      * gets User defined host name
      */
-    private void getHostName() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter your host name: ");
-        yourName = scanner.nextLine();
-    }
-
-    /**
-     * finds and returns an available port
-     */
-    private int findAvailablePort() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter Port Number to Listen to: ");
-        String strPortNum = scanner.nextLine();
-        portNumber = Integer.parseInt(strPortNum);
-        return portNumber;
+    private void getHostName(String yourName) {
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.print("Enter your host name: ");
+//        yourName = scanner.nextLine();
+        this.yourName = yourName;
     }
 
     /**
@@ -74,10 +67,15 @@ public class Host {
      */
     private void createServerSocket() {
         //Creating Server Socket
-        try {
-            listener = new ServerSocket(portNumber);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for(int port = START; port<= END; port++){
+            try{
+                port = ThreadLocalRandom.current().nextInt(START,END);
+                listener = new ServerSocket(port);
+                portNumber = port;
+                break;
+            }catch (IOException e){
+                continue;
+            }
         }
     }
 
@@ -197,6 +195,7 @@ public class Host {
      * respond to the request. These messages are requests from other users
      */
     private void readServerInputStream(String s, Socket socket) {
+        System.out.println("----------------------" + s);
         String[] split = s.split("-");
         if (split[0].equals("in") || split[0].equals("read")) {         // Read "in" or "read" from input stream
             requests.add(new Pair<>(s, socket));
@@ -207,15 +206,41 @@ public class Host {
 
         } else if (split[0].equals("unblock")) {                        // Read "unblock" from input Stream
             System.out.println("Tuple Found: " + split[1]);
-            endBlockingCode();
-            closeSocket(socket);
+            handleInOrReadReplyResponse(socket, split[1]);
 
         } else if (split[0].equals("add")) {                            // Read "add" from input Stream
             handleServerAddRequest(split[1], socket);
 
+        } else if (split[0].equals("delete")) {
+            deleteTuple(split[1], socket);
         } else {                                        // Got some other garbage - could be null or something else
             System.out.println(s);
         }
+    }
+
+    private void handleInOrReadReplyResponse(Socket socket, String tupleString) {
+        String[] split = myRequest.split("-");
+        Tuple myTuple = new Tuple(split[1]);
+        Tuple receivedTuple = new Tuple(tupleString);
+        if (myTuple.equals(receivedTuple)) {
+            // Received the correct Tuple
+            System.out.println("Received: " + receivedTuple.toString());
+            endBlockingCode();
+            myRequest = "no current request pending";
+            if (split[0].equals("in")) {
+                try {
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    out.println("delete-" + tupleString);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                closeSocket(socket);
+            }
+        }else {
+            closeSocket(socket);
+        }
+
     }
 
     /**
@@ -230,6 +255,15 @@ public class Host {
         for (String s : split)          // Going through each Host and adding them to Host List
             hostInfoList.addHost(s);
         hostInfoList.save(yourName);
+        closeSocket(socket);            // Ending Socket Connection
+    }
+
+    /**
+     * Delete a tuple
+     */
+    private void deleteTuple(String tupleString, Socket socket) {
+        System.out.println("Deleting!");
+        tupleSpace.remove(tupleSpace.search(tupleString));
         closeSocket(socket);            // Ending Socket Connection
     }
 
@@ -254,10 +288,7 @@ public class Host {
      */
     private void handlerServerInOrReadRequest(Pair<String, Socket> request) {
         // Checks whether Request was and In or Read Command
-        boolean isRead = true;
         String[] split = request.getKey().split("-");
-        if (split[0].equals("in"))
-            isRead = false;
 
         // Extract out the tuple requested and will search tuple space for it
         String input = split[1];
@@ -267,12 +298,6 @@ public class Host {
             // Reply back to blocked host that the tuple was found - returns back the tuple
             System.out.println("Found!");
             handleServerInOrReadReply(tupleSpace.get(searchIndex).toString(), socket);
-            if (!isRead) {
-                // Request was "In" therefore the tuple will be deleted upon return
-                System.out.println("Deleting!");
-                tupleSpace.remove(searchIndex);
-                tupleSpace.save(yourName);
-            }
             // FulFilled Request, so it should removed off the Request List
             requests.remove(request);
         }
@@ -282,11 +307,11 @@ public class Host {
     /**
      * Will Send a message contain and "unblock" and the found tuple back to the user
      */
-    private void handleServerInOrReadReply(String message, Socket socket) {
+    private void handleServerInOrReadReply(String tuple, Socket socket) {
         // Signal Host to Wake up
         try {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println("unblock-" + message);
+            out.println("unblock-" + tuple);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -410,20 +435,23 @@ public class Host {
      */
     private void handleClientInOrReadRequest(String input, String inOrRead) {
         String message = inOrRead + "-" + input;
+        myRequest = message;
         // Checks whether or not the Tuple Request has a variable parameter or not
         if (input.contains("?")) {
             //Broadcast Message to everyone
+            System.out.println("Broadcast!");
             broadcastInOrReadRequest(message);
         } else {
             // Specific host to request from
-            specificInOrReadRequest(message,input);
+            specificInOrReadRequest(message, input);
         }
     }
 
     /**
      * Will broadcast the In or Read Request to all hosts
      */
-    private void broadcastInOrReadRequest(String message){
+    private void broadcastInOrReadRequest(String message) {
+        System.out.println(hostInfoList);
         for (int i = 0; i < hostInfoList.size(); i++) {
             try {
                 Socket socket = new Socket(hostInfoList.get(i).getiPAddress(), hostInfoList.get(i).getPortNumber());
@@ -432,27 +460,26 @@ public class Host {
                 out.println(message);
                 isBlocking = true;
                 System.out.println("BLOCKED!");
-                while (true) {                  //todo STUCK HERE!
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                    } catch (Exception e) {
-
-                    }
-                    System.out.println("still blocked");
-                    if (!isBlocking)
-                        break;
-                }
-                socket.close();
             } catch (IOException e) {
                 System.out.println("Error in linda in");
             }
+        }
+        while (true) {                  //todo STUCK HERE!
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (Exception e) {
+
+            }
+            System.out.println("still blocked");
+            if (!isBlocking)
+                break;
         }
     }
 
     /**
      * Will hash the message and based on that hash, choose a specific host to send the In or Read Request to
      */
-    private void specificInOrReadRequest(String message, String input){
+    private void specificInOrReadRequest(String message, String input) {
         int sendToHost = getHostIDFromMD5Hash(input, hostInfoList.size());
         try {
             Socket socket = new Socket(hostInfoList.getByID(sendToHost).getiPAddress(), hostInfoList.getByID(sendToHost).getPortNumber());
@@ -461,19 +488,18 @@ public class Host {
             out.println(message);//WRITING TO SOCKET
             isBlocking = true;
             System.out.println("BLOCKED!");
-            while (true) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (Exception e) {
-
-                }
-                System.out.println("still blocked");
-                if (!isBlocking)
-                    break;
-            }
-            socket.close();
         } catch (IOException e) {
             System.out.println("Error in linda in");
+        }
+        while (true) {
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (Exception e) {
+
+            }
+            System.out.println("still blocked");
+            if (!isBlocking)
+                break;
         }
     }
 

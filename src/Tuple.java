@@ -1,4 +1,3 @@
-import javafx.util.Pair;
 import java.util.ArrayList;
 
 /**
@@ -30,6 +29,7 @@ public class Tuple {
             type = "variable";
         else
             type = "int";
+        System.out.println("type = " + type);
         return new Pair<>(string, type);
 
     }
@@ -57,6 +57,13 @@ public class Tuple {
                 if (!this.tuple.get(i).getValue().equals(variableRequired)) {
                     return false;
                 }
+            }else if(this.get(i).getValue().equals("variable")){
+                String variableRequired = this.get(i).getKey();
+                variableRequired = variableRequired.split(":")[1];
+                if (!tuple.tuple.get(i).getValue().equals(variableRequired)) {
+                    return false;
+                }
+
             } else if (!this.tuple.get(i).getKey().equals(tuple.get(i).getKey()))    // Checks if Key is the same
                 return false;
 
@@ -75,5 +82,11 @@ public class Tuple {
 
         }
         return string;
+    }
+
+    public static void main(String[] args){
+        Tuple t = new Tuple("i?:int");
+        Tuple t2 = new Tuple("1");
+        System.out.println(t.equals(t2));
     }
 }

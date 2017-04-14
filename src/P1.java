@@ -3,6 +3,10 @@
  */
 public class P1 {
     public static void main(String[] args) {
-        new Host();
+        if(args.length==1){
+            new Host(args[0]);
+        }else{
+            System.out.println("Invalid Numer of Arguments. Try Again");
+        }
     }
 }
