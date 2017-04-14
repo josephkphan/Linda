@@ -83,7 +83,7 @@ public class Host {
      * Adds yourself to a new empty host List.
      */
     private void createHostList() {
-        System.out.println("Creating socket to yourself");
+//        System.out.println("Creating socket to yourself");
         hostInfoList.addHost(yourName + "," + ip.getHostAddress() + "," + Integer.toString(portNumber), 0);
         hostInfoList.save(yourName);
     }
@@ -116,7 +116,7 @@ public class Host {
      */
     private void endBlockingCode() {
         isBlocking = false;
-        System.out.println("NOT BLOCKED ANYMORE!");
+//        System.out.println("NOT BLOCKED ANYMORE!");
     }
 
     /**
@@ -195,7 +195,7 @@ public class Host {
      * respond to the request. These messages are requests from other users
      */
     private void readServerInputStream(String s, Socket socket) {
-        System.out.println("----------------------" + s);
+//        System.out.println("----------------------" + s);
         String[] split = s.split("-");
         if (split[0].equals("in") || split[0].equals("read")) {         // Read "in" or "read" from input stream
             requests.add(new Pair<>(s, socket));
@@ -205,7 +205,6 @@ public class Host {
             handleServerOutRequest(split[1], socket);
 
         } else if (split[0].equals("unblock")) {                        // Read "unblock" from input Stream
-            System.out.println("Tuple Found: " + split[1]);
             handleInOrReadReplyResponse(socket, split[1]);
 
         } else if (split[0].equals("add")) {                            // Read "add" from input Stream
@@ -262,7 +261,7 @@ public class Host {
      * Delete a tuple
      */
     private void deleteTuple(String tupleString, Socket socket) {
-        System.out.println("Deleting!");
+//        System.out.println("Deleting!");
         tupleSpace.remove(tupleSpace.search(tupleString));
         closeSocket(socket);            // Ending Socket Connection
     }
@@ -296,7 +295,7 @@ public class Host {
         int searchIndex = tupleSpace.search(input);
         if (searchIndex != -1) {
             // Reply back to blocked host that the tuple was found - returns back the tuple
-            System.out.println("Found!");
+//            System.out.println("Found!");
             handleServerInOrReadReply(tupleSpace.get(searchIndex).toString(), socket);
             // FulFilled Request, so it should removed off the Request List
             requests.remove(request);
@@ -340,8 +339,8 @@ public class Host {
                 String input = split2[0];
                 if (command.equals("in")) {                                     // User "in" Request
                     handleClientInOrReadRequest(input, "in");
-                } else if (command.equals("read")) {
-                    handleClientInOrReadRequest(input, "read");        // User "read" Request
+                } else if (command.equals("rd")) {
+                    handleClientInOrReadRequest(input, "read");        // User "rd" Request
                 } else if (command.equals("out")) {
                     handleClientOutRequest(input);
                 } else if (command.equals("add")) {                             // User "add" Request
@@ -459,7 +458,7 @@ public class Host {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 out.println(message);
                 isBlocking = true;
-                System.out.println("BLOCKED!");
+//                System.out.println("BLOCKED!");
             } catch (IOException e) {
                 System.out.println("Error in linda in");
             }
@@ -470,7 +469,6 @@ public class Host {
             } catch (Exception e) {
 
             }
-            System.out.println("still blocked");
             if (!isBlocking)
                 break;
         }
@@ -487,7 +485,7 @@ public class Host {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(message);//WRITING TO SOCKET
             isBlocking = true;
-            System.out.println("BLOCKED!");
+//            System.out.println("BLOCKED!");
         } catch (IOException e) {
             System.out.println("Error in linda in");
         }
@@ -495,9 +493,7 @@ public class Host {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (Exception e) {
-
             }
-            System.out.println("still blocked");
             if (!isBlocking)
                 break;
         }

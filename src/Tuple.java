@@ -29,7 +29,6 @@ public class Tuple {
             type = "variable";
         else
             type = "int";
-        System.out.println("type = " + type);
         return new Pair<>(string, type);
 
     }
@@ -84,9 +83,4 @@ public class Tuple {
         return string;
     }
 
-    public static void main(String[] args){
-        Tuple t = new Tuple("i?:int");
-        Tuple t2 = new Tuple("1");
-        System.out.println(t.equals(t2));
-    }
 }
