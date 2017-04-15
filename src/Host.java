@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -17,6 +14,7 @@ public class Host {
     private final static String salt = "DGE$5SGr@3VsHYUMas2323E4d57vfBfFSTRU@!DSH(*%FDSdfg13sgfsg";     // md5 salt
     private final static int START = 1025;
     private final static int END = 65525;
+    private final String LOGIN = "jphan1";
     private ServerSocket listener;                      // Used to accept other socket connections
     private String yourName;                            // Your host name
     private InetAddress ip;                             // Your IP Address
@@ -26,6 +24,7 @@ public class Host {
     private ArrayList<Pair<String, Socket>> requests;   // Saves all in and read requests
     private HostInfoList hostInfoList;                  // Contains all Host Information
     private String myRequest;                           // saves your last request
+    private String tupleFilePath, hostInfoFilePath;     // saves data to these files
 
     public Host(String hostName) {
         // Initializing Variables
@@ -43,6 +42,7 @@ public class Host {
      */
     private void setUp(String hostName) {
         getHostName(hostName);
+        createFilePath();
 //        findAvailablePort();
         createServerSocket();
         getIPAddress();
@@ -50,6 +50,22 @@ public class Host {
         createSocketListenerThread();
         createHostList();
         clearTupleSpace();
+    }
+
+    /**
+     * Create File paths
+     */
+    private void createFilePath() {
+        // Path for My Computer
+        String dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/" + yourName + "/";
+
+        // Path for DC Machine
+        //        String dir = "/home/" + LOGIN + "/tmp/linda/" + yourName + "/";
+        File f = new File(dir);
+        boolean success = f.mkdir();
+
+        tupleFilePath = dir + "tuples.txt";
+        hostInfoFilePath = dir + "nets.txt";
     }
 
     /**
@@ -67,13 +83,13 @@ public class Host {
      */
     private void createServerSocket() {
         //Creating Server Socket
-        for(int port = START; port<= END; port++){
-            try{
-                port = ThreadLocalRandom.current().nextInt(START,END);
+        for (int port = START; port <= END; port++) {
+            try {
+                port = ThreadLocalRandom.current().nextInt(START, END);
                 listener = new ServerSocket(port);
                 portNumber = port;
                 break;
-            }catch (IOException e){
+            } catch (IOException e) {
                 continue;
             }
         }
@@ -85,7 +101,7 @@ public class Host {
     private void createHostList() {
 //        System.out.println("Creating socket to yourself");
         hostInfoList.addHost(yourName + "," + ip.getHostAddress() + "," + Integer.toString(portNumber), 0);
-        hostInfoList.save(yourName);
+        hostInfoList.save(hostInfoFilePath);
     }
 
     /**
@@ -93,7 +109,7 @@ public class Host {
      */
     private void clearTupleSpace() {
         tupleSpace.getTupleList().clear();
-        tupleSpace.save(yourName);
+        tupleSpace.save(tupleFilePath);
     }
 
     /**
@@ -233,10 +249,10 @@ public class Host {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }else{
+            } else {
                 closeSocket(socket);
             }
-        }else {
+        } else {
             closeSocket(socket);
         }
 
@@ -251,9 +267,10 @@ public class Host {
     private void handleServerAddRequest(String hostInfoString, Socket socket) {
         hostInfoList.clear();
         String[] split = hostInfoString.split("/");
-        for (String s : split)          // Going through each Host and adding them to Host List
+        for (String s : split) {          // Going through each Host and adding them to Host List
             hostInfoList.addHost(s);
-        hostInfoList.save(yourName);
+        }
+        hostInfoList.save(hostInfoFilePath);
         closeSocket(socket);            // Ending Socket Connection
     }
 
@@ -261,7 +278,7 @@ public class Host {
      * Delete a tuple
      */
     private void deleteTuple(String tupleString, Socket socket) {
-//        System.out.println("Deleting!");
+//      System.out.println("Deleting!");
         tupleSpace.remove(tupleSpace.search(tupleString));
         closeSocket(socket);            // Ending Socket Connection
     }
@@ -274,9 +291,10 @@ public class Host {
     private void handleServerOutRequest(String input, Socket socket) {
         tupleSpace.add(input);                      // Adds tuple to Tuple space and will print what tuple was received
         System.out.println("Received Tuple: " + input);
-        tupleSpace.save(yourName);
-        for (Pair<String, Socket> r : requests)     // Checks if any in or read requests were filled
+        tupleSpace.save(tupleFilePath);
+        for (Pair<String, Socket> r : requests) {     // Checks if any in or read requests were filled
             handlerServerInOrReadRequest(r);
+        }
         closeSocket(socket);                        //Close socket connection - no need to reply back to user.
     }
 
@@ -329,8 +347,9 @@ public class Host {
             System.out.print("Linda>");
             String s = scanner.nextLine();                          // Read User's Input
             try {
-                if (!s.contains("(") || !s.contains(")"))           // Simple Check to see if User's input is valid
+                if (!s.contains("(") || !s.contains(")")) {        // Simple Check to see if User's input is valid
                     throw new Exception();
+                }
                 s = s.replaceAll("\\s+", "");                       // Remove input from User's Request
                 String[] split;
                 split = s.split("\\(");                       // Split by (
@@ -350,7 +369,7 @@ public class Host {
                         handleClientAddRequest(input);
                     }
 //                    hostInfoList.print();
-                    hostInfoList.save(yourName);                    // Save Successfully added hosts onto net file
+                    hostInfoList.save(hostInfoFilePath);                    // Save Successfully added hosts onto net file
                     sendAllHostsCurrentHostInfoList();              // Notify Other Hosts of this net file
                 } else {
                     throw new Exception();
@@ -515,9 +534,9 @@ public class Host {
      */
     private static String MD5Hash(String message) {
         String md5 = "";
-        if (null == message)
+        if (null == message) {
             return null;
-
+        }
         message = message + salt;       //adding a salt to the string before it gets hashed.
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");            //Create MessageDigest object for MD5
@@ -541,7 +560,9 @@ public class Host {
             int d = digits.indexOf(c);
             val = 16 * val + d;
         }
-        if (val < 0) val *= -1;
+        if (val < 0) {
+            val *= -1;
+        }
         return val;
     }
 

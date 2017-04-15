@@ -60,9 +60,9 @@ public class TupleSpace {
     /**
      * Writes Tuple Space to a file
      */
-    public void save(String hostname) {
+    public void save(String filePath) {
         try {
-            PrintWriter writer = new PrintWriter(hostname + "-tuples.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter(filePath, "UTF-8");
 
             for (Tuple t : tupleList) {
                 writer.println(t.toString());

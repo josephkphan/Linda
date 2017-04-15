@@ -81,9 +81,9 @@ public class HostInfoList {
     /**
      * Writes Host List to a file
      */
-    public void save(String hostname) {
+    public void save(String filePath) {
         try {
-            PrintWriter writer = new PrintWriter(hostname + "-nets.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter(filePath, "UTF-8");
             for (HostInfo h : hostList) {
                 writer.println(h.toString());
             }
