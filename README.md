@@ -39,7 +39,7 @@ linda> in(“abc”, ?i:int)
 get tuple (“abc”, 3) on 129.210.16.81
 linda>
 
-#More Information
+# More Information
 The add hosts will run the remote execute program to setup client/server program on the hosts and report available
 port numbers. All those information should save on the hosts’ /tmp/<login>/linda/<name>/nets and all tuples should
 store in /tmp/<login>/linda/<name>/tuples. Make the /tmp/<login>, /tmp/<login>/linda and
