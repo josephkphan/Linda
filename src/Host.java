@@ -223,7 +223,7 @@ public class Host {
         Tuple receivedTuple = new Tuple(tupleString);
         if (myTuple.equals(receivedTuple)) {
             // Received the correct Tuple
-            System.out.println("Received: " + receivedTuple.toString());
+            System.out.println("get tuple(" + receivedTuple.toString() + ") on " + socket.getInetAddress().getHostAddress());
             endBlockingCode();
             myRequest = "no current request pending";
             if (split[0].equals("in")) {
@@ -421,6 +421,7 @@ public class Host {
             //Send out Tuple info for host to save
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(message);
+            System.out.println("put tuple (" + input + ") on " + socket.getInetAddress().getHostAddress());
         } catch (IOException e) {
             System.out.println("Error in lindaOut");
         }
@@ -438,7 +439,7 @@ public class Host {
         // Checks whether or not the Tuple Request has a variable parameter or not
         if (input.contains("?")) {
             //Broadcast Message to everyone
-            System.out.println("Broadcast!");
+//            System.out.println("Broadcast!");
             broadcastInOrReadRequest(message);
         } else {
             // Specific host to request from
@@ -450,7 +451,6 @@ public class Host {
      * Will broadcast the In or Read Request to all hosts
      */
     private void broadcastInOrReadRequest(String message) {
-        System.out.println(hostInfoList);
         for (int i = 0; i < hostInfoList.size(); i++) {
             try {
                 Socket socket = new Socket(hostInfoList.get(i).getiPAddress(), hostInfoList.get(i).getPortNumber());

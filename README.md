@@ -6,10 +6,10 @@ tuple space by atomic operations(in, rd, inp, rdp, out, eval) For my model, I ha
 
 
 # Linda Commands:
- - in(<tuple>) - will Request a tuple from the tuple space and delete it. It is also a blocking call
- - rd(<tuple>) - will Request a tuple from the tuple space and read it. It is also a blocking call
- - out(<tuple>) - will insert a tuple into the tuple space
- - add{(<host name>, <ip address>, <port number>)}  - adds the following host
+ - in(tuple) - will Request a tuple from the tuple space and delete it. It is also a blocking call
+ - rd(tuple) - will Request a tuple from the tuple space and read it. It is also a blocking call
+ - outtuple) - will insert a tuple into the tuple space
+ - add{(host name, ip address, port number)}  - adds the following host
 
 # Note
 The add command has to be executed before all other subcommands.
