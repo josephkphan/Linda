@@ -24,20 +24,20 @@ Run the Program
 
 
 # Examples:
-$ P1 host_1
-129.210.16.80 at port number: 9998
-linda>
+$ P1 host_1  <br />
+129.210.16.80 at port number: 9998  <br />
+linda>  <br />
 
 $ P1 host_2
-129.210.16.81 at port number: 3571
-linda> add (host_1, 129.210.16.80, 9998)
-linda> out(“abc”, 3)
-put tuple (“abc”, 3) on 129.210.16.81
-linda>
+129.210.16.81 at port number: 3571  <br />
+linda> add (host_1, 129.210.16.80, 9998)  <br />
+linda> out(“abc”, 3)  <br />
+put tuple (“abc”, 3) on 129.210.16.81  <br />
+linda>  <br />
 
-linda> in(“abc”, ?i:int)
-get tuple (“abc”, 3) on 129.210.16.81
-linda>
+linda> in(“abc”, ?i:int)  <br />
+get tuple (“abc”, 3) on 129.210.16.81  <br />
+linda>  <br />
 
 # More Information
 The add hosts will run the remote execute program to setup client/server program on the hosts and report available
