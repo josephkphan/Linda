@@ -15,11 +15,11 @@ tuple space by atomic operations(in, rd, inp, rdp, out, eval) For my model, I ha
 The add command has to be executed before all other subcommands.
 
 # Run the Program
-Compile the Files
+Compile the Files  <br />
  - "javac Host.java HostInfo.java HostInfoList.java P1.java Tuple.java TupleSpace.java Pair.java"
-Run the Program
+Run the Program  <br />
  - "java P1 <host name>"
- Clean up files
+ Clean up files  <br />
  - "rm *.class *.txt
 
 
