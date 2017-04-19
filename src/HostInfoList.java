@@ -32,8 +32,35 @@ public class HostInfoList {
         return false;
     }
 
+    public int getIndex(int id) throws Exception {
+        {
+            for (int i = 0; i < hostList.size(); i++)
+                if (hostList.get(i).getId() == id) {
+                    return i;
+                }
+        }
+        throw new Exception();
+    }
+
+    public int getIndex(String hostName) {
+        for (int i = 0; i < hostList.size(); i++)
+            if (hostList.get(i).getHostName().equals(hostName)) {
+                return i;
+            }
+        return -1;
+
+    }
+
     public HostInfo get(int index) {
         return hostList.get(index);
+    }
+
+    public void remove(String hostName){
+        try {
+            hostList.remove(getIndex(hostName));
+        }catch (Exception e){
+            System.out.println("incorrect host name");
+        }
     }
 
     /**
@@ -47,7 +74,15 @@ public class HostInfoList {
         return null;
     }
 
-    public void remove(){
+    public HostInfo getByHostName(String hostName) throws Exception {
+        for (HostInfo h : hostList) {
+            if (h.getHostName().equals(hostName))
+                return h;
+        }
+        throw new Exception();
+    }
+
+    public void remove() {
         //todo Implement me! Part 2
     }
 
@@ -92,4 +127,27 @@ public class HostInfoList {
             // do something
         }
     }
+
+    public void update(String string){
+        hostList.clear();
+        String split[] = string.split("/");
+        for(String s: split){
+            System.out.println(s);
+            this.addHost(s);
+        }
+    }
+
+
+    public static void main(String[] args) {
+        HostInfoList hostInfoList = new HostInfoList();
+        hostInfoList.addHost("h0,127.0.1.1,56351,0");
+        hostInfoList.addHost("h1,127.0.1.1,29603,1");
+        System.out.println(hostInfoList.toString());
+        System.out.println("-----------------------------");
+        HostInfoList h2 = new HostInfoList();
+        h2.update(hostInfoList.toString());
+        System.out.println(h2.toString());
+
+    }
+
 }

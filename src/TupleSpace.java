@@ -73,4 +73,32 @@ public class TupleSpace {
         }
     }
 
+    public void update(String string){
+        tupleList.clear();
+        String[] split = string.split("/");
+        for(String s: split){
+            this.add(s);
+        }
+    }
+    @Override
+    public String toString(){
+        String string = "";
+        for(Tuple t: tupleList){
+            string+=t.toString();
+            string +="/";
+        }
+        return string;
+    }
+
+    public static void main(String[] args) {
+        TupleSpace t1 = new TupleSpace();
+        t1.add("100:\"abc\",1,3.0");
+        t1.add("99:2.0");
+        System.out.println(t1.toString());
+        TupleSpace t2 = new TupleSpace();
+        t2.update(t1.toString());
+        System.out.println("-------------------");
+        System.out.println(t2.toString());
+    }
+
 }

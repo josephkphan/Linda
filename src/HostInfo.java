@@ -21,6 +21,13 @@ public class HostInfo {
         portNumber = Integer.parseInt(split[2]);
     }
 
+    public HostInfo(String hostName, String iPAddress, int portNumber, int id) {
+        this.hostName = hostName;
+        this.iPAddress = iPAddress;
+        this.portNumber = portNumber;
+        this.id = id;
+    }
+
     public String getHostName() {
         return hostName;
     }
@@ -37,6 +44,22 @@ public class HostInfo {
         return id;
     }
 
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public void setiPAddress(String iPAddress) {
+        this.iPAddress = iPAddress;
+    }
+
+    public void setPortNumber(int portNumber) {
+        this.portNumber = portNumber;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return getHostName() + "," + getiPAddress() + "," + Integer.toString(getPortNumber()) +
@@ -48,5 +71,6 @@ public class HostInfo {
             return true;
         return false;
     }
+
 
 }

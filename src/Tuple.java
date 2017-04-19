@@ -6,13 +6,25 @@ import java.util.ArrayList;
  */
 public class Tuple {
     private ArrayList<Pair<String, String>> tuple;
+    int ID;
 
     public Tuple(String tupleString) {
+        String[] split = tupleString.split(":");
+        ID = Integer.parseInt(split[0]);
+        tupleString= split[1];
+        tuple = new ArrayList<Pair<String, String>>();
+        split = tupleString.split(",");
+        for (String s : split) {
+            tuple.add(determineType(s));
+        }
+    }
+    public Tuple(String tupleString, int ID) {
         tuple = new ArrayList<Pair<String, String>>();
         String[] split = tupleString.split(",");
         for (String s : split) {
             tuple.add(determineType(s));
         }
+        this.ID = ID;
     }
 
     /**
@@ -35,6 +47,22 @@ public class Tuple {
 
     public int getSize() {
         return tuple.size();
+    }
+
+    public ArrayList<Pair<String, String>> getTuple() {
+        return tuple;
+    }
+
+    public void setTuple(ArrayList<Pair<String, String>> tuple) {
+        this.tuple = tuple;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
     }
 
     public Pair<String, String> get(int index) {
@@ -72,7 +100,7 @@ public class Tuple {
 
     @Override
     public String toString() {
-        String string = "";
+        String string = Integer.toString(ID)+ ":";
         for (int i = 0; i < tuple.size(); i++) {
             string += tuple.get(i).getKey();
             if (i != tuple.size() - 1) {

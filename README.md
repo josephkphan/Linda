@@ -1,5 +1,8 @@
 # Linda
 
+# Setup
+Change the login in to your own!
+
 # Project Description:
 Linda is a distributed model that provides a conceptually global tuple space. Remote processes can access the
 tuple space by atomic operations(in, rd, inp, rdp, out, eval) For my model, I have only implemented in, rd, out, and add
