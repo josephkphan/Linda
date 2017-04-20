@@ -49,7 +49,6 @@ public class Host {
         isBlocking = false;
 
         setUp(hostName);
-        justCameBackFromCrash();
         System.out.println("lookUpTable = " + lookUpTable.toString());
         startLindaCommandPrompt();
     }
@@ -60,14 +59,26 @@ public class Host {
     private void setUp(String hostName) {
         getHostName(hostName);
         createFilePath();
-//        findAvailablePort();
         createServerSocket();
         getIPAddress();
         displayIPAddress();
         createSocketListenerThread();
-        createHostList();
-        clearTupleSpace();
-        lookUpTable.addNewHost(yourName);
+        File f = new File(dir);
+        if(f.exists() && f.isDirectory()) {
+            //Data already exists,
+            System.out.println("Came Back From Crash- Recovering Data");
+            //todo Read from Net File, Tuple Space, Etc, remake your stuff from files
+//            tupleSpace.fromfile();
+//            hostInfoList.fromFile();
+//            lookUpTable.fromFile();
+            justCameBackFromCrash();
+        }else{
+            System.out.println("Start Up Fresh");
+            boolean success = f.mkdir();
+            createHostList();
+            clearTupleSpace();
+            lookUpTable.addNewHost(yourName);
+        }
     }
 
     /**
@@ -79,8 +90,6 @@ public class Host {
 
         // Path for DC Machine
         // String dir = "/tmp/" + LOGIN + "/linda/"+ yourName+"/";
-        File f = new File(dir);
-        boolean success = f.mkdir();
 
         tupleFilePath = dir + "tuples.txt";
         hostInfoFilePath = dir + "nets.txt";
@@ -274,7 +283,7 @@ public class Host {
             handleServerUpdateBackUpRequest(split[1], socket);
 
         } else if (split[0].equals("requestYouToBackUpTupleSpace")) { //todo used in delete -
-            socketReplyMessage("backUpTupleSpace-" + tupleSpace.toString(), socket);
+            saveBackup();
 
         }  else {                                        // Got some other garbage - could be null or something else
             System.out.println(s);
@@ -414,7 +423,7 @@ public class Host {
         //Broadcast the new look up table to everyone
         broadcastMessage("updateLookUpTable-" + lookUpTable.toString());
 
-        //redistribute your tuples
+        //redistribute your tuples  //dont really need this but its okay
         redistributeTuples();
 
         int index = findHostForBackUpYouHave(yourName);
@@ -422,13 +431,22 @@ public class Host {
         //remove yourself from hostList.
         hostInfoList.remove(yourName);
         broadcastMessage("add-" + hostInfoList.toString());
-
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         //delete the directory
         //todo implement me!  implement me!  implement me!  implement me!
         deleteDir(new File(dir));
         //tell somebody else to backup their data
-        singleMessage("backUpTupleSpace-somebodyPeacedOut", index); //todo not going to work
+        singleMessage("requestYouToBackUpTupleSpace-somebodyPeacedOut", index); //todo not going to work
         closeSocket(socket);
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         exit(0);    //todo should this be here?
 
     }
@@ -600,11 +618,16 @@ public class Host {
                     }
                     broadcastMessage("updateLookUpTable-" + lookUpTable.toString());
 
-                    //todo hostListInfo.get(hostListInfo.size-2) needs to reupdate his backup to the new host'
-                    singleMessage("requestYouToBackUpTupleSpace", hostInfoList.size() - 1);
+//                    //todo hostListInfo.get(hostListInfo.size-2) needs to reupdate his backup to the new host'
+//                    singleMessage("requestYouToBackUpTupleSpace", hostInfoList.size() - 1);
 
                 } else if (command.equals("delete")) {
-                    handleClientDeleteRequest(input);
+                    for (int i = 1; i < split.length; i++) {        // *note user can add more than one host at a time
+                        split2 = split[i].split("\\)");
+                        input = split2[0];
+                        handleClientDeleteRequest(input);
+                    }
+
                 } else {
                     throw new Exception();
                 }
@@ -705,6 +728,7 @@ public class Host {
 
     }
 
+
     private void startBlockingCode() {
         isBlocking = true;
         while (true) {
@@ -767,15 +791,12 @@ public class Host {
 
     private void justCameBackFromCrash() {
         // Try to connect to your backup
-        if(findBackupHostIndex(yourName)!=hostInfoList.getIndex(yourName)) {
-            try {
-                singleMessageWithoutBackUpCatch("requestRecoverData-saveMePlease", findBackupHostIndex(yourName));
-                singleMessageWithoutBackUpCatch("pleaseUpdateYourBackUp-prettyPlease", findHostForBackUpYouHave(yourName));
-            } catch (Exception e) {
-                System.out.println("communication with backup failed");
-            }
-        }else{
-            System.out.println("no backup- start fresh");
+        try {
+            singleMessageWithoutBackUpCatch("requestRecoverData-saveMePlease", findBackupHostIndex(yourName));
+            singleMessageWithoutBackUpCatch("pleaseUpdateYourBackUp-prettyPlease", findHostForBackUpYouHave(yourName));
+        } catch (Exception e) {
+            System.out.println("communication with backup failed");
+            e.printStackTrace();
         }
 
     }
