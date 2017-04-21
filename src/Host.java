@@ -34,8 +34,8 @@ public class Host {
     private String backUpTupleFilePath, lookUpTableFilePath;
     private LookUpTable lookUpTable;
     private final int MIN = 0;
-    private final int MAX = 99;
-//    private final int MAX = ((int) Math.pow(2, 32) - 1);
+    private final int MAX = 127;
+//    private final int MAX = ((int) Math.pow(2, 16) - 1);      //todo change to this later?
 
 
     public Host(String hostName) {
@@ -617,7 +617,6 @@ public class Host {
                     broadcastMessage("add-" + hostInfoList.toString());              // Notify Other Hosts of this net file
                     hostInfoList.save(hostInfoFilePath);                    // Save Successfully added hosts onto net file
                     lookUpTable.save(lookUpTableFilePath);
-                    System.out.println("HERE!");
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (Exception e) {
@@ -889,7 +888,3 @@ public class Host {
     }
 
 }
-
-
-//todo Qestuins - should there be a broadcast for update back ups?
-// todo questions - what happens when 2 more users are added ^
