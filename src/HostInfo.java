@@ -14,11 +14,12 @@ public class HostInfo {
     }
 
     public HostInfo(String hostInfo) {
+        System.out.println(hostInfo);
         String[] split = hostInfo.split(",");
         hostName = split[0];
         iPAddress = split[1];
-        this.id = Integer.parseInt(split[3]);
         portNumber = Integer.parseInt(split[2]);
+        this.id = Integer.parseInt(split[3]);
     }
 
     public HostInfo(String hostName, String iPAddress, int portNumber, int id) {

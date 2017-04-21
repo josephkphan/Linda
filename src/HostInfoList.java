@@ -1,5 +1,4 @@
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -129,11 +128,31 @@ public class HostInfoList {
     }
 
     public void update(String string){
+        System.out.println(string);
         hostList.clear();
         String split[] = string.split("/");
         for(String s: split){
             System.out.println(s);
             this.addHost(s);
+        }
+    }
+
+    public void fromFile(String filePath){
+        try {
+            File file = new File(filePath);
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String line;
+            String string = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                string +=line;
+                string +='/';
+            }
+            string = string.substring(0,string.length()-1);
+            update(string);
+            fileReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

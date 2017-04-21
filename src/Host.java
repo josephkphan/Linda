@@ -68,9 +68,9 @@ public class Host {
             //Data already exists,
             System.out.println("Came Back From Crash- Recovering Data");
             //todo Read from Net File, Tuple Space, Etc, remake your stuff from files
-//            tupleSpace.fromfile();
-//            hostInfoList.fromFile();
-//            lookUpTable.fromFile();
+            tupleSpace.fromFile(tupleFilePath);
+            hostInfoList.fromFile(hostInfoFilePath);
+            lookUpTable.fromFile(lookUpTableFilePath);
             justCameBackFromCrash();
         }else{
             System.out.println("Start Up Fresh");
@@ -78,6 +78,9 @@ public class Host {
             createHostList();
             clearTupleSpace();
             lookUpTable.addNewHost(yourName);
+            lookUpTable.save(lookUpTableFilePath);
+            backUpTupleSpace.save(backUpTupleFilePath);
+            hostInfoList.save(hostInfoFilePath);
         }
     }
 
@@ -131,7 +134,6 @@ public class Host {
     private void createHostList() {
 //        System.out.println("Creating socket to yourself");
         hostInfoList.addHost(yourName + "," + ip.getHostAddress() + "," + Integer.toString(portNumber), 0);
-        hostInfoList.save(hostInfoFilePath);
     }
 
     /**
@@ -492,6 +494,7 @@ public class Host {
                     hostInfoList.toString() + "~" +
                     backUpTupleSpace.toString() + "~" +
                     lookUpTable.toString());
+            //todo ADD BACK UP REQUEST QUEUE
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -503,6 +506,10 @@ public class Host {
         hostInfoList.update(split[0]);
         tupleSpace.update(split[1]);
         lookUpTable.update(split[2]);
+
+        //todo ADD BACK UP REQUEST QUEUE
+
+        //todo ALSO SAVE REQUEST QUEUE
 
         hostInfoList.save(hostInfoFilePath);
         tupleSpace.save(tupleFilePath);
