@@ -111,7 +111,6 @@ public class Host {
         hostInfoFilePath = dir + "nets.txt";
         backUpTupleFilePath = dir + "backUpTuples.txt";
         lookUpTableFilePath = dir + "lookUpTable.txt";
-
     }
 
     /**
@@ -561,6 +560,7 @@ public class Host {
         closeSocket(socket);
     }
 
+
     ////////////////////////////////////// Server Recover Data Methods //////////////////////////////////////////////
 
     /**
@@ -730,12 +730,14 @@ public class Host {
         if (input.contains("?")) {
             //Broadcast Message to everyone
             broadcastMessage(message);
+            startBlockingCode();
         } else {
             // Specific host to request from
             int sendToHost = getHostIndexFromTupleID(getTupleID(input));
             singleMessage(message, sendToHost);
+            startBlockingCode2(sendToHost);
         }
-        startBlockingCode();
+
     }
 
     /**
@@ -779,6 +781,21 @@ public class Host {
         isBlocking = true;
         while (true) {
             timeout(2);
+            if (!isBlocking)
+                break;
+        }
+    }
+    private void startBlockingCode2(int hostIndex) {        //todo Test me?
+        isBlocking = true;
+        while (true) {
+            timeout(1);
+            try{
+                Socket socket = new Socket(hostInfoList.getByID(hostIndex).getiPAddress(), hostInfoList.getByID(hostIndex).getPortNumber());
+                timeout(1);
+                socket.close();
+            }catch ( IOException e){
+                break;
+            }
             if (!isBlocking)
                 break;
         }
