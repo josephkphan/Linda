@@ -19,6 +19,10 @@ public class LookUpTable {
         addNewHost(hostName);
     }
 
+    /**
+     * adds a new host to the table. All host's ranges will lose 1/n where n is the total number of hosts (adding in the
+     * new host)
+     */
     public void addNewHost(String Hostname) {
         int oldMax,oldRange, newMax;
         ArrayList<Range> host = new ArrayList<Range>();
@@ -39,6 +43,9 @@ public class LookUpTable {
         lookUpTable.add(new Pair<>(Hostname, host));
     }
 
+    /**
+     * deletes a host from the table. It will redistribute the values that host had evenly amongst all other hosts
+     */
     public void deleteHost(String Hostname){
         int index = searchForHost(Hostname);
         int rangeDiff;
@@ -104,6 +111,9 @@ public class LookUpTable {
         return string;
     }
 
+    /**
+     * Will update the tuple space by the given string. By update, I mean this will replace the entire tuple space
+     */
     public void update(String string){
         lookUpTable.clear();
         String[] split = string.split("/");
@@ -123,6 +133,10 @@ public class LookUpTable {
         }
 
     }
+
+    /**
+     * Writes data to file
+     */
     public void save(String filePath) {
         String string = "";
         for (Pair<String, ArrayList<Range>> p : lookUpTable) {
@@ -145,6 +159,9 @@ public class LookUpTable {
         }
     }
 
+    /**
+     * Will load data from file
+     */
     public void fromFile(String filePath){
         try {
             File file = new File(filePath);
@@ -164,6 +181,9 @@ public class LookUpTable {
         }
     }
 
+    /**
+     * Test Cases
+     */
     public static void main(String[] args) {
         LookUpTable lookUpTable = new LookUpTable(0,99);
         lookUpTable.addNewHost("h0");

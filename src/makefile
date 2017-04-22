@@ -1,7 +1,0 @@
-compile:
-	javac Host.java HostInfo.java HostInfoList.java P1.java Tuple.java TupleSpace.java Pair.java
-run:
-	java P1 h0
-clean:
-	rm *.class
-	rm *.txt
