@@ -34,6 +34,7 @@ public class Host {
     private LookUpTable lookUpTable;                    // Used to Map Tuples from the consistent Hashing
     private final int MIN = 0;                          // Minimum Value allowed from Consistent Hashing
     private final int MAX = 127;                        // Maximum Value allowed from Consistent Hashing
+    private boolean fromCrashSuccessful;
 //    private final int MAX = ((int) Math.pow(2, 16) - 1);      //todo change to this later
 
     /**
@@ -75,10 +76,21 @@ public class Host {
             tupleSpace.fromFile(tupleFilePath);
             hostInfoList.fromFile(hostInfoFilePath);
             lookUpTable.fromFile(lookUpTableFilePath);
-
+            fromCrashSuccessful = true;
             // Request Data from your backup
             justCameBackFromCrash();
+            if(!fromCrashSuccessful){
+                System.out.println("Communication wth back up failed. Starting Fresh");
+                createHostList();                               // Create the Host List and add yourself
+                clearTupleSpace();                              // Create an empty Tuple Space
+                lookUpTable.clear();
+                lookUpTable.addNewHost(yourName);               // Create a new lookup table and add yourself
 
+                // Save data to files
+                lookUpTable.save(lookUpTableFilePath);
+                backUpTupleSpace.save(backUpTupleFilePath);
+                hostInfoList.save(hostInfoFilePath);
+            }
         } else {
             // You were not part of a system.
             System.out.println("No data to recover from- Starting Fresh");
@@ -147,6 +159,7 @@ public class Host {
      * Adds yourself to a new empty host List.
      */
     private void createHostList() {
+        hostInfoList.clear();
         hostInfoList.addHost(yourName + "," + ip.getHostAddress() + "," + Integer.toString(portNumber), 0);
     }
 
@@ -173,7 +186,7 @@ public class Host {
      */
     private void endBlockingCode() {
         isBlocking = false;
-//        System.out.println("NOT BLOCKED ANYMORE!");
+        System.out.println("NOT BLOCKED ANYMORE!");
     }
 
     /**
@@ -250,7 +263,7 @@ public class Host {
      * respond to the request. These messages are requests from other users
      */
     private void readServerInputStream(String s, Socket socket) {
-        System.out.println("--------" + s + "--------");
+//        System.out.println("--------" + s + "--------");
         String[] split = s.split("-");
         if (split[0].equals("in") || split[0].equals("read")) {         // Read "in" or "read" from input stream
             requests.add(new Pair<>(s, socket));
@@ -311,6 +324,7 @@ public class Host {
         if (myTuple.equals(receivedTuple)) {
             // Received the correct Tuple
             System.out.println("get tuple(" + receivedTuple.toString() + ") on " + socket.getInetAddress().getHostAddress());
+            System.out.print("Linda>");
             endBlockingCode();
             myRequest = "no current request pending";
             if (split[0].equals("in")) {
@@ -336,7 +350,7 @@ public class Host {
      * All host should be sent in one String. This will replace the current Host net information
      */
     private void handleServerAddRequest(String hostInfoString, Socket socket) {
-        System.out.println("Adding Hosts: " + hostInfoString);
+        System.out.println("Updating Host List" );
         hostInfoList.clear();
         String[] split = hostInfoString.split("/");
         for (String s : split) {          // Going through each Host and adding them to Host List
@@ -369,7 +383,7 @@ public class Host {
             handlerServerInOrReadRequest(r);
         }
         closeSocket(socket);                        //Close socket connection - no need to reply back to user.
-        System.out.println("Saving:" + input);
+//        System.out.println("Saving Tuple:" + input);
         saveBackup();
     }
 
@@ -384,7 +398,8 @@ public class Host {
         } catch (Exception e) {
             System.out.println("Save to back up failed.");
         }
-        System.out.println("sending out to backup:" + tupleSpace.toString() + " in host " + findBackupHostIndex(yourName));
+        System.out.println("sending out backup to save - in host " +
+                hostInfoList.get(findBackupHostIndex(yourName)).getiPAddress());
     }
 
 
@@ -403,7 +418,7 @@ public class Host {
         int searchIndex = tupleSpace.search(input);
         if (searchIndex != -1) {
             // Reply back to blocked host that the tuple was found - returns back the tuple
-//            System.out.println("Found!");
+//            System.out.println("Found Tuple in Tuple Space");
             socketReplyMessage("unblock-" + tupleSpace.get(searchIndex).toString(), socket);
             // FulFilled Request, so it should removed off the Request List
             requests.remove(request);
@@ -418,7 +433,7 @@ public class Host {
         // Signal Host to Wake up
         try {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println("unblock-" + message);
+            out.println(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -431,7 +446,7 @@ public class Host {
      * You're a ghost now..
      */
     private void handleServerDeleteRequest(Socket socket) {
-        System.out.println("I have to delete Myself");
+        System.out.println("Removing Myself from the system");
         if(hostInfoList.size()==1){
             //You're the last one
             deleteDir(new File(dir));
@@ -471,7 +486,8 @@ public class Host {
      */
     private void handleServerUpdateLookUpTableRequest(Socket socket, String input) {
         // Saves Lookup Table
-        System.out.println("Received lookuptable: " + input);
+        System.out.println("Updating Lookup Table");
+        System.out.print("Linda>");
         lookUpTable.update(input);
         lookUpTable.save(lookUpTableFilePath);
         // Checks for misplaced Tuples
@@ -484,6 +500,7 @@ public class Host {
      */
     private void redistributeTuples() {
         System.out.println("Redistributing Tuples");
+        System.out.print("Linda>");
         // Going through Tuple Space
         for (int i = 0; i < tupleSpace.size(); i++) {
             String hostToHoldTuple = lookUpTable.getHostFromID(tupleSpace.get(i).getID());
@@ -556,6 +573,7 @@ public class Host {
     private void handleServerUpdateBackUpRequest(String input, Socket socket) {
         backUpTupleSpace.update(input);
         System.out.println("Saving Backup: " + input);
+        System.out.print("Linda>");
         backUpTupleSpace.save(backUpTupleFilePath);
         closeSocket(socket);
     }
@@ -574,7 +592,6 @@ public class Host {
                     hostInfoList.toString() + "~" +
                     backUpTupleSpace.toString() + "~" +
                     lookUpTable.toString());
-            //todo ADD BACK UP REQUEST QUEUE
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -587,10 +604,6 @@ public class Host {
         tupleSpace.update(split[1]);
         lookUpTable.update(split[2]);
 
-        //todo ADD BACK UP REQUEST QUEUE
-
-        //todo ALSO SAVE REQUEST QUEUE
-
         hostInfoList.save(hostInfoFilePath);
         tupleSpace.save(tupleFilePath);
         lookUpTable.save(lookUpTableFilePath);
@@ -602,6 +615,7 @@ public class Host {
             broadcastMessage("add-" + hostInfoList.toString());
         } catch (Exception e) {
             System.out.println("Incorrect name given");
+            System.out.print("Linda>");
         }
     }
 
@@ -662,7 +676,6 @@ public class Host {
                 }
             } catch (Exception e) {
                 System.out.println("Invalid Input. Please Try again");
-                e.printStackTrace();
             }
         }
     }
@@ -700,9 +713,7 @@ public class Host {
      * the type to the correct host over the distributed system (where the tuple will be saved)
      */
     private void handleClientOutRequest(String input) {
-        //todo should also add in ID into the out message to save with the tuple. !!!!!!!!!!
         int sendToHost = getHostIndexFromTupleID(getTupleID(input));
-        System.out.println(sendToHost);
         String message = "out-" + Integer.toString(getTupleID(input)) + ":" + input;
         try {
             // Create Socket Connection
@@ -724,7 +735,7 @@ public class Host {
      * Tuple requests can include variables i.e.   read(i?:string, i?:float, 3.0)
      */
     private void handleClientInOrReadRequest(String input, String inOrRead) {
-        String message = inOrRead + "-" + input;
+        String message = inOrRead + "-"  + Integer.toString(getTupleID(input)) + ":" + input;
         myRequest = message;
         // Checks whether or not the Tuple Request has a variable parameter or not
         if (input.contains("?")) {
@@ -759,7 +770,7 @@ public class Host {
      * Will broadcast the In or Read Request to all hosts
      */
     private void broadcastMessage(String message) {
-        System.out.println("Broadcasting Message:" + message);
+//        System.out.println("Broadcasting Message:" + message);
         for (int i = 0; i < hostInfoList.size(); i++) {
             try {
                 Socket socket = new Socket(hostInfoList.get(i).getiPAddress(), hostInfoList.get(i).getPortNumber());
@@ -778,6 +789,7 @@ public class Host {
      * A Read or Write Request was just made. This imitates a blocking request
      */
     private void startBlockingCode() {
+        System.out.println("BLOCKED");
         isBlocking = true;
         while (true) {
             timeout(2);
@@ -785,7 +797,8 @@ public class Host {
                 break;
         }
     }
-    private void startBlockingCode2(int hostIndex) {        //todo Test me?
+    private void startBlockingCode2(int hostIndex) {
+        System.out.println("BLOCKED");
         isBlocking = true;
         while (true) {
             timeout(1);
@@ -810,7 +823,7 @@ public class Host {
      */
     private void singleMessage(String message, int hostIndex) {
         try {
-            System.out.println("Sending out message:" + message);
+//            System.out.println("Sending out message:" + message);
             Socket socket = new Socket(hostInfoList.getByID(hostIndex).getiPAddress(), hostInfoList.getByID(hostIndex).getPortNumber());
             createSocketInputStreamHandlerThread(socket);
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -826,13 +839,16 @@ public class Host {
      */
     private void singleMessageWithoutBackUpCatch(String message, int hostIndex) {
         try {
-            System.out.println("Sending out message(nobackup): " + message);
+//            System.out.println("Sending out message(nobackup): " + message);
             Socket socket = new Socket(hostInfoList.getByID(hostIndex).getiPAddress(), hostInfoList.getByID(hostIndex).getPortNumber());
             createSocketInputStreamHandlerThread(socket);
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(message);
         } catch (IOException e) {
-            System.out.println("ERROR in single message w/o backup");
+            if(message.equals("requestRecoverData-saveMePlease")){
+                fromCrashSuccessful = false;
+            }
+//            System.out.println("ERROR in single message w/o backup");
         }
     }
 
@@ -848,7 +864,6 @@ public class Host {
             singleMessageWithoutBackUpCatch("pleaseUpdateYourBackUp-prettyPlease", findHostForBackUpYouHave(yourName));
         } catch (Exception e) {
             System.out.println("communication with backup failed");
-            e.printStackTrace();
         }
 
     }
@@ -885,8 +900,7 @@ public class Host {
      */
     private int getTupleID(String message) {
         String hashedString = MD5Hash(message);
-//        return hex2decimal(hashedString) % ((int) Math.pow(2, 32) - 1);        //todo should now be 2^32, not numhosts
-        return hex2decimal(hashedString) % MAX;        //todo should now be 2^32, not numhosts
+        return hex2decimal(hashedString) % MAX;
     }
 
     /**

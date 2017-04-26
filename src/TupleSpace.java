@@ -88,6 +88,8 @@ public class TupleSpace {
             fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e){
+//            System.out.println("tuple space was empty");
         }
     }
 

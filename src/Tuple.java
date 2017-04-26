@@ -74,9 +74,9 @@ public class Tuple {
      * if is it a variable parameter, it will check the type rather than the actual value
      */
     public boolean equals(Tuple tuple) {
-        if (tuple.getSize() != this.getSize())          // Checks if the Tuple has the same number of elements
+        if (tuple.getSize() != this.getSize()) {          // Checks if the Tuple has the same number of elements
             return false;
-
+        }
         for (int i = 0; i < this.getSize(); i++) {      // Checks whether it is a variable parameter or not
             if (tuple.get(i).getValue().equals("variable")) {
                 String variableRequired = tuple.get(i).getKey();

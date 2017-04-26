@@ -128,11 +128,9 @@ public class HostInfoList {
     }
 
     public void update(String string){
-        System.out.println(string);
         hostList.clear();
         String split[] = string.split("/");
         for(String s: split){
-            System.out.println(s);
             this.addHost(s);
         }
     }

@@ -19,6 +19,10 @@ public class LookUpTable {
         addNewHost(hostName);
     }
 
+    public void clear(){
+        lookUpTable.clear();
+    }
+
     /**
      * adds a new host to the table. All host's ranges will lose 1/n where n is the total number of hosts (adding in the
      * new host)
@@ -118,7 +122,6 @@ public class LookUpTable {
         lookUpTable.clear();
         String[] split = string.split("/");
         for(String s : split){
-            System.out.println(s);
             ArrayList<Range> arrayList = new ArrayList<Range>();
             String[] split2 = s.split(":");
             String[] split3 = split2[1].split(",");
