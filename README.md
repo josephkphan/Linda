@@ -1,25 +1,28 @@
 # Linda
 
-# Setup
-Change the login in to your own!
-
 # Project Description:
 Linda is a distributed model that provides a conceptually global tuple space. Remote processes can access the
 tuple space by atomic operations(in, rd, inp, rdp, out, eval) For my model, I have only implemented in, rd, out, and add
-
+This program supports redundancy and fault-tolerant. There replication factor of 2 Any host and any process can
+fail but the network configurations (i.e., host IP addresses and port numbers) should always available, and the
+tuples space should consistent. To create this redundancy, consistency, high availability, and fault tolerance,
+I integrated consistent hashing to effeciently adda nd remove hosts.
 
 # Linda Commands:
  - in(tuple) - will Request a tuple from the tuple space and delete it. It is also a blocking call
  - rd(tuple) - will Request a tuple from the tuple space and read it. It is also a blocking call
  - outtuple) - will insert a tuple into the tuple space
  - add{(host name, ip address, port number)}  - adds the following host
+ - delete{(host name)} - will delete a host from the system
 
 # Note
-The add command has to be executed before all other subcommands.
+ - This program only handles edge cases for at most one host is crashed at a time
+ - If a host is crashed, all the requests unfulfilled by that host will be dropped
+
 
 # Run the Program
 Compile the Files  <br />
- - "javac Host.java HostInfo.java HostInfoList.java P1.java Tuple.java TupleSpace.java Pair.java" <br />
+ - run "make"
 
 Run the Program
  - "java P1 <host name>" <br />

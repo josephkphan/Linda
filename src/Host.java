@@ -794,6 +794,8 @@ public class Host {
                 timeout(1);
                 socket.close();
             }catch ( IOException e){
+                System.out.println("Connection Failed: request dropped");
+                isBlocking = false;
                 break;
             }
             if (!isBlocking)
