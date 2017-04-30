@@ -62,16 +62,16 @@ public class HostInfoList {
         }
     }
 
-    /**
-     * Search HostInfo List by Host ID
-     */
-    public HostInfo getByID(int ID) {
-        for (HostInfo h : hostList) {
-            if (h.getId() == ID)
-                return h;
-        }
-        return null;
-    }
+//    /**
+//     * Search HostInfo List by Host ID
+//     */
+//    public HostInfo getByID(int ID) {
+//        for (HostInfo h : hostList) {
+//            if (h.getId() == ID)
+//                return h;
+//        }
+//        return null;
+//    }
 
     public HostInfo getByHostName(String hostName) throws Exception {
         for (HostInfo h : hostList) {
