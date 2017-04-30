@@ -62,16 +62,16 @@ public class HostInfoList {
         }
     }
 
-//    /**
-//     * Search HostInfo List by Host ID
-//     */
-//    public HostInfo getByID(int ID) {
-//        for (HostInfo h : hostList) {
-//            if (h.getId() == ID)
-//                return h;
-//        }
-//        return null;
-//    }
+    /**
+     * Search HostInfo List by Host ID
+     */
+    public HostInfo getByID(int ID) {
+        for (HostInfo h : hostList) {
+            if (h.getId() == ID)
+                return h;
+        }
+        return null;
+    }
 
     public HostInfo getByHostName(String hostName) throws Exception {
         for (HostInfo h : hostList) {
@@ -152,16 +152,6 @@ public class HostInfoList {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    public static void main(String[] args) {
-        String dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/h0/nets.txt";
-        HostInfoList hostInfoList = new HostInfoList();
-        hostInfoList.fromFile(dir);
-        System.out.println("hostInfoList.toString() = " + hostInfoList.toString());
-        int index = hostInfoList.getIndex("h0");
-        System.out.println("index = " + index);
     }
 
 }

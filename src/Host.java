@@ -114,10 +114,10 @@ public class Host {
      */
     private void createFilePath() {
         // Path for My Computer
-        dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/" + yourName + "/";
+//        dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/" + yourName + "/";
 
         // Path for DC Machine
-        // dir = "/tmp/" + LOGIN + "/linda/"+ yourName+"/";
+        dir = "/tmp/" + LOGIN + "/linda/"+ yourName+"/";
 
         tupleFilePath = dir + "tuples.txt";
         hostInfoFilePath = dir + "nets.txt";
@@ -201,9 +201,7 @@ public class Host {
         }
     }
 
-
     ////////////////////////////////////////////  SERVER CODE  ////////////////////////////////////////////////////
-
 
     /**
      * Keeps a thread running to check whether other hosts want to add this one. On accept(), it will
@@ -241,7 +239,6 @@ public class Host {
                         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                         String streamString = in.readLine();
                         readServerInputStream(streamString, socket);
-//                        System.out.println(streamString);
                         if (streamString.equals("null")) {
                             // Will Check whether the input Stream is Null - If it is null then socket connection failed
                             break;
@@ -255,7 +252,6 @@ public class Host {
             }
         });
         t.start();
-
     }
 
     /**
@@ -402,8 +398,6 @@ public class Host {
         } catch (Exception e) {
 //            System.out.println("Save to back up failed.");
         }
-//        System.out.println("sending out backup to save - in host " +
-//                hostInfoList.get(findBackupHostIndex(yourName)).getiPAddress());
     }
 
 
@@ -493,7 +487,6 @@ public class Host {
     private void handleServerUpdateLookUpTableRequest(Socket socket, String input) {
         // Saves Lookup Table
 //        System.out.println("Updating Lookup Table");
-//        System.out.print("Linda>");
         lookUpTable.update(input);
         lookUpTable.save(lookUpTableFilePath);
         // Checks for misplaced Tuples
@@ -506,7 +499,6 @@ public class Host {
      */
     private void redistributeTuples() {
 //        System.out.println("Redistributing Tuples");
-//        System.out.print("Linda>");
         // Going through Tuple Space
         for (int i = 0; i < tupleSpace.size(); i++) {
             String hostToHoldTuple = lookUpTable.getHostFromID(tupleSpace.get(i).getID());
@@ -521,14 +513,13 @@ public class Host {
         saveBackup();
     }
 
-
     ////////////////////////////////////////Back up Stuff/////////////////////////////////////////
 
     /**
      * Delete a tuple from the back up Tuple Space
      */
     private void deleteBackUpTuple(String tupleString, Socket socket) {
-        System.out.println("Deleting!");
+//        System.out.println("Deleting!");
         backUpTupleSpace.remove(backUpTupleSpace.search(tupleString));
         backUpTupleSpace.save(backUpTupleFilePath);
         closeSocket(socket);
@@ -550,7 +541,6 @@ public class Host {
         closeSocket(socket);                        //Close socket connection - no need to reply back to user.
     }
 
-
     /**
      * Checks whether if the tuple is found. If it is found, it will send a message back to the receiver with the
      * tuple. If it is not found. It will not send a message back. It will then save the request and if an out
@@ -571,7 +561,6 @@ public class Host {
             // FulFilled Request, so it should removed off the Request List
             backUpRequests.remove(request);
         }
-
     }
 
     /**
@@ -600,9 +589,7 @@ public class Host {
         } else {
             closeSocket(socket);
         }
-
     }
-
 
     /**
      * Saves the new Back up Tuple Space for another host
@@ -610,7 +597,6 @@ public class Host {
     private void handleServerUpdateBackUpRequest(String input, Socket socket) {
         backUpTupleSpace.update(input);
 //        System.out.println("Saving Backup: " + input);
-//        System.out.print("Linda>");
         backUpTupleSpace.save(backUpTupleFilePath);
         closeSocket(socket);
     }
@@ -711,7 +697,6 @@ public class Host {
                     split2 = input.split(",");
                     for (int i = 0; i < split2.length; i++) {        // *note user can add more than one host at a time
                         handleClientDeleteRequest(split2[i]);
-
                     }
 
                 } else {
@@ -800,13 +785,10 @@ public class Host {
     private void handleClientDeleteRequest(String input) {
         //tell the new client to go kill himself
         try {
-            System.out.println("TESTING: " + Integer.toString(hostInfoList.getIndex(input)));
             singleMessageWithoutBackUpCatch("deleteYoSelf", hostInfoList.getIndex(input));
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Incorrect Name");
         }
-
     }
 
     /////////////////////////////////////////// Helper Methods ///////////////////////////////////////////////////////
@@ -827,7 +809,6 @@ public class Host {
                 System.out.println("send message to backup!");
             }
         }
-
     }
 
     /**
@@ -854,7 +835,6 @@ public class Host {
                 socket.close();
             } catch (IOException e) {
                 System.out.println("Connection Failed with Host. Request Sent to Backup");
-                System.out.println("backup" + message);
                 singleMessageWithoutBackUpCatch("backup" + message, findBackupHostIndex(hostIndex));
                 timeout(1);
                 isBlocking = false;
@@ -897,7 +877,6 @@ public class Host {
             if (message.equals("requestRecoverData-saveMePlease")) {
                 fromCrashSuccessful = false;
             }
-//            System.out.println("ERROR in single message w/o backup");
         }
     }
 
@@ -1010,5 +989,4 @@ public class Host {
         }
         return dir.delete();
     }
-
 }
