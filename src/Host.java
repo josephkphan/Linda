@@ -114,10 +114,10 @@ public class Host {
      */
     private void createFilePath() {
         // Path for My Computer
-//        dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/" + yourName + "/";
+        dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/" + yourName + "/";
 
         // Path for DC Machine
-        dir = "/tmp/" + LOGIN + "/linda/"+ yourName+"/";
+//        dir = "/tmp/" + LOGIN + "/linda/"+ yourName+"/";
 
         tupleFilePath = dir + "tuples.txt";
         hostInfoFilePath = dir + "nets.txt";

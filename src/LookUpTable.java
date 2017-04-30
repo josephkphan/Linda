@@ -184,23 +184,4 @@ public class LookUpTable {
         }
     }
 
-    /**
-     * Test Cases
-     */
-    public static void main(String[] args) {
-        LookUpTable lookUpTable = new LookUpTable(0,99);
-        lookUpTable.addNewHost("h0");
-        lookUpTable.addNewHost("h1");
-        lookUpTable.addNewHost("h2");
-        lookUpTable.addNewHost("h3");
-//        System.out.println(lookUpTable.toString());
-        lookUpTable.deleteHost("h3");
-        System.out.println(lookUpTable.toString());
-
-        System.out.println("---------------------------------");
-        LookUpTable t2 = new LookUpTable(0,99);
-        t2.update(lookUpTable.toString());
-        System.out.println(t2.toString());
-
-    }
 }
