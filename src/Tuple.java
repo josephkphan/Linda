@@ -111,4 +111,16 @@ public class Tuple {
         return string;
     }
 
+    public String toString2() {
+        String string = "";
+        for (int i = 0; i < tuple.size(); i++) {
+            string += tuple.get(i).getKey();
+            if (i != tuple.size() - 1) {
+                string += ",";
+            }
+
+        }
+        return string;
+    }
+
 }

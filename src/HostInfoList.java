@@ -156,15 +156,12 @@ public class HostInfoList {
 
 
     public static void main(String[] args) {
+        String dir = "/home/jphan/IdeaProjects/Coen241CloudComputing/h0/nets.txt";
         HostInfoList hostInfoList = new HostInfoList();
-        hostInfoList.addHost("h0,127.0.1.1,56351,0");
-        hostInfoList.addHost("h1,127.0.1.1,29603,1");
-        System.out.println(hostInfoList.toString());
-        System.out.println("-----------------------------");
-        HostInfoList h2 = new HostInfoList();
-        h2.update(hostInfoList.toString());
-        System.out.println(h2.toString());
-
+        hostInfoList.fromFile(dir);
+        System.out.println("hostInfoList.toString() = " + hostInfoList.toString());
+        int index = hostInfoList.getIndex("h0");
+        System.out.println("index = " + index);
     }
 
 }

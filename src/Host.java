@@ -33,7 +33,7 @@ public class Host {
     private String backUpTupleFilePath, lookUpTableFilePath;    // FilePaths used for backup
     private LookUpTable lookUpTable;                    // Used to Map Tuples from the consistent Hashing
     private final int MIN = 0;                          // Minimum Value allowed from Consistent Hashing
-    private final int MAX = 127;                        // Maximum Value allowed from Consistent Hashing
+    private final int MAX = 65535;                        // Maximum Value allowed from Consistent Hashing
     private boolean fromCrashSuccessful;
 //    private final int MAX = ((int) Math.pow(2, 16) - 1);      //todo change to this later
 
@@ -263,7 +263,7 @@ public class Host {
      * respond to the request. These messages are requests from other users
      */
     private void readServerInputStream(String s, Socket socket) {
-//        System.out.println("--------" + s + "--------");
+        System.out.println("--------" + s + "--------");
         String[] split = s.split("-");
         if (split[0].equals("in") || split[0].equals("read")) {         // Read "in" or "read" from input stream
             requests.add(new Pair<>(s, socket));
@@ -273,14 +273,20 @@ public class Host {
             handleServerOutRequest(split[1], socket);
 
         } else if (split[0].equals("backupin") || split[0].equals("backupread")) {          // Read "backupin"
+            System.out.println("cp - 0");
             backUpRequests.add(new Pair<>(s, socket));
-            handlerServerBackUpInOrReadRequest(backUpRequests.get(requests.size() - 1));
+            System.out.println("cp - 1");
+            handlerServerBackUpInOrReadRequest(backUpRequests.get(backUpRequests.size() - 1));
+            System.out.println("cp - 2");
 
         } else if (split[0].equals("backupout")) {                      // Read "backupout"
             handleServerBackUpOutRequest(split[1], socket);
 
         } else if (split[0].equals("unblock")) {                        // Read "unblock" from input Stream
             handleInOrReadReplyResponse(socket, split[1]);
+
+        }else if(split[0].equals("backupunblock")){
+            handleBackUpInOrReadReplyResponse(socket, split[1]);
 
         } else if (split[0].equals("add")) {                            // Read "add" from input Stream
             handleServerAddRequest(split[1], socket);
@@ -290,6 +296,8 @@ public class Host {
 
         } else if (split[0].equals("backupdelete")) {                   // Used to delete tuples from back up
             deleteBackUpTuple(split[1], socket);
+
+            //todo Implement Move backup!! it should only be called for host 0, host 0 saves his backuptuplespace for the newly added dude
 
         } else if (split[0].equals("requestRecoverData")) {             // crashed host asking for their data back
             sendRecoverData(socket);
@@ -323,7 +331,7 @@ public class Host {
         Tuple receivedTuple = new Tuple(tupleString);
         if (myTuple.equals(receivedTuple)) {
             // Received the correct Tuple
-            System.out.println("get tuple(" + receivedTuple.toString() + ") on " + socket.getInetAddress().getHostAddress());
+            System.out.println("get tuple(" + receivedTuple.toString2() + ") on " + socket.getInetAddress().getHostAddress());
             System.out.print("Linda>");
             endBlockingCode();
             myRequest = "no current request pending";
@@ -350,7 +358,7 @@ public class Host {
      * All host should be sent in one String. This will replace the current Host net information
      */
     private void handleServerAddRequest(String hostInfoString, Socket socket) {
-        System.out.println("Updating Host List" );
+//        System.out.println("Updating Host List" );
         hostInfoList.clear();
         String[] split = hostInfoString.split("/");
         for (String s : split) {          // Going through each Host and adding them to Host List
@@ -366,6 +374,7 @@ public class Host {
     private void deleteTuple(String tupleString, Socket socket) {
 //      System.out.println("Deleting!");
         tupleSpace.remove(tupleSpace.search(tupleString));
+        tupleSpace.save(tupleFilePath);
         closeSocket(socket);            // Ending Socket Connection
         saveBackup();
     }
@@ -396,10 +405,10 @@ public class Host {
         try {
             singleMessageWithoutBackUpCatch("backUpTupleSpace-" + tupleSpace.toString(), findBackupHostIndex(yourName));
         } catch (Exception e) {
-            System.out.println("Save to back up failed.");
+//            System.out.println("Save to back up failed.");
         }
-        System.out.println("sending out backup to save - in host " +
-                hostInfoList.get(findBackupHostIndex(yourName)).getiPAddress());
+//        System.out.println("sending out backup to save - in host " +
+//                hostInfoList.get(findBackupHostIndex(yourName)).getiPAddress());
     }
 
 
@@ -446,12 +455,14 @@ public class Host {
      * You're a ghost now..
      */
     private void handleServerDeleteRequest(Socket socket) {
-        System.out.println("Removing Myself from the system");
+        timeout(2);
         if(hostInfoList.size()==1){
             //You're the last one
+            System.out.println("Successfully Deleted Myself - exiting program now");
             deleteDir(new File(dir));
             exit(0); // Everything about you was pretty much erased from existence. Might as well die
         }
+
         lookUpTable.deleteHost(yourName);           // delete that user from the current Look up table
         broadcastMessage("updateLookUpTable-" + lookUpTable.toString()); //Broadcast the new look up table to everyone
         redistributeTuples();                       //redistribute your tuples  //technically this line is redundant
@@ -467,6 +478,7 @@ public class Host {
         closeSocket(socket);
         timeout(1);
         deleteDir(new File(dir));
+        System.out.println("Successfully Deleted Myself - exiting program now");
         exit(0); // Everything about you was pretty much erased from existence. Might as well die
     }
 
@@ -486,8 +498,8 @@ public class Host {
      */
     private void handleServerUpdateLookUpTableRequest(Socket socket, String input) {
         // Saves Lookup Table
-        System.out.println("Updating Lookup Table");
-        System.out.print("Linda>");
+//        System.out.println("Updating Lookup Table");
+//        System.out.print("Linda>");
         lookUpTable.update(input);
         lookUpTable.save(lookUpTableFilePath);
         // Checks for misplaced Tuples
@@ -499,8 +511,8 @@ public class Host {
      * Sends and erases any tuples you should no longer have. Backs up your tuple space
      */
     private void redistributeTuples() {
-        System.out.println("Redistributing Tuples");
-        System.out.print("Linda>");
+//        System.out.println("Redistributing Tuples");
+//        System.out.print("Linda>");
         // Going through Tuple Space
         for (int i = 0; i < tupleSpace.size(); i++) {
             String hostToHoldTuple = lookUpTable.getHostFromID(tupleSpace.get(i).getID());
@@ -522,8 +534,9 @@ public class Host {
      * Delete a tuple from the back up Tuple Space
      */
     private void deleteBackUpTuple(String tupleString, Socket socket) {
-//      System.out.println("Deleting!");
+        System.out.println("Deleting!");
         backUpTupleSpace.remove(backUpTupleSpace.search(tupleString));
+        backUpTupleSpace.save(backUpTupleFilePath);
         closeSocket(socket);
 
     }
@@ -552,6 +565,8 @@ public class Host {
     private void handlerServerBackUpInOrReadRequest(Pair<String, Socket> request) {
         // Checks whether Request was and In or Read Command
         String[] split = request.getKey().split("-");
+        System.out.println("HEREEE");
+        System.out.println(split[1]);
 
         // Extract out the tuple requested and will search tuple space for it
         String input = split[1];
@@ -560,7 +575,7 @@ public class Host {
         if (searchIndex != -1) {
             // Reply back to blocked host that the tuple was found - returns back the tuple
 //            System.out.println("Found!");
-            socketReplyMessage("unblock-" + backUpTupleSpace.get(searchIndex).toString(), socket);
+            socketReplyMessage("backupunblock-" + backUpTupleSpace.get(searchIndex).toString(), socket);
             // FulFilled Request, so it should removed off the Request List
             backUpRequests.remove(request);
         }
@@ -568,12 +583,42 @@ public class Host {
     }
 
     /**
+     * Will see if you can fulfill the given in or read request
+     */
+    private void handleBackUpInOrReadReplyResponse(Socket socket, String tupleString) {
+        String[] split = myRequest.split("-");
+        Tuple myTuple = new Tuple(split[1]);
+        Tuple receivedTuple = new Tuple(tupleString);
+        if (myTuple.equals(receivedTuple)) {
+            // Received the correct Tuple
+            System.out.println("get tuple(" + receivedTuple.toString2() + ") (from backup) on " + socket.getInetAddress().getHostAddress());
+            System.out.print("Linda>");
+            endBlockingCode();
+            myRequest = "no current request pending";
+            if (split[0].equals("in")) {
+                try {
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    out.println("backupdelete-" + tupleString);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                closeSocket(socket);
+            }
+        } else {
+            closeSocket(socket);
+        }
+
+    }
+
+
+    /**
      * Saves the new Back up Tuple Space for another host
      */
     private void handleServerUpdateBackUpRequest(String input, Socket socket) {
         backUpTupleSpace.update(input);
-        System.out.println("Saving Backup: " + input);
-        System.out.print("Linda>");
+//        System.out.println("Saving Backup: " + input);
+//        System.out.print("Linda>");
         backUpTupleSpace.save(backUpTupleFilePath);
         closeSocket(socket);
     }
@@ -590,8 +635,8 @@ public class Host {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println("receivedRecoverData-" +
                     hostInfoList.toString() + "~" +
-                    backUpTupleSpace.toString() + "~" +
-                    lookUpTable.toString());
+                    lookUpTable.toString() + "~" +
+                    backUpTupleSpace.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -601,8 +646,13 @@ public class Host {
         // remove net file, tuplespace, look up table  from recover data
         String[] split = recoverData.split("~");
         hostInfoList.update(split[0]);
-        tupleSpace.update(split[1]);
-        lookUpTable.update(split[2]);
+        lookUpTable.update(split[1]);
+        if(split.length == 3) {
+            tupleSpace.update(split[2]);
+        }else{
+            tupleSpace.clear();
+            tupleSpace.save(tupleFilePath);
+        }
 
         hostInfoList.save(hostInfoFilePath);
         tupleSpace.save(tupleFilePath);
@@ -655,6 +705,8 @@ public class Host {
                     }
 //                    hostInfoList.print();
                     broadcastMessage("add-" + hostInfoList.toString());              // Notify Other Hosts of this net file
+                    timeout(1);
+                    //singleMessage("moveBackUp-please",0);    //todo Host 0 should send his backup to the mosot recently added ...
                     hostInfoList.save(hostInfoFilePath);                    // Save Successfully added hosts onto net file
                     lookUpTable.save(lookUpTableFilePath);
                     try {
@@ -665,10 +717,9 @@ public class Host {
                     broadcastMessage("updateLookUpTable-" + lookUpTable.toString());
 
                 } else if (command.equals("delete")) {              // Want to delete a host from network
-                    for (int i = 1; i < split.length; i++) {        // *note user can add more than one host at a time
-                        split2 = split[i].split("\\)");
-                        input = split2[0];
-                        handleClientDeleteRequest(input);
+                    split2 = input.split(",");
+                    for (int i = 0; i < split2.length; i++) {        // *note user can add more than one host at a time
+                        handleClientDeleteRequest(split2[i]);
                     }
 
                 } else {
@@ -723,7 +774,7 @@ public class Host {
             out.println(message);
             System.out.println("put tuple (" + input + ") on " + socket.getInetAddress().getHostAddress());
         } catch (IOException e) {
-            System.out.println("out to backup");
+            System.out.println("Connection with Host failed: Sending out request to backup");
             singleMessageWithoutBackUpCatch("backup" + message, findBackupHostIndex(sendToHost));
         }
 
@@ -745,8 +796,8 @@ public class Host {
         } else {
             // Specific host to request from
             int sendToHost = getHostIndexFromTupleID(getTupleID(input));
-            singleMessage(message, sendToHost);
-            startBlockingCode2(sendToHost);
+            singleMessageWithoutBackUpCatch(message, sendToHost);
+            startBlockingCode2(sendToHost,message);
         }
 
     }
@@ -797,7 +848,7 @@ public class Host {
                 break;
         }
     }
-    private void startBlockingCode2(int hostIndex) {
+    private void startBlockingCode2(int hostIndex, String message) {
         System.out.println("BLOCKED");
         isBlocking = true;
         while (true) {
@@ -807,7 +858,10 @@ public class Host {
                 timeout(1);
                 socket.close();
             }catch ( IOException e){
-                System.out.println("Connection Failed: request dropped");
+                System.out.println("Connection Failed with Host. Request Sent to Backup");
+                System.out.println("backup"+message);
+                singleMessageWithoutBackUpCatch("backup"+message,findBackupHostIndex(hostIndex));
+                timeout(1);
                 isBlocking = false;
                 break;
             }
@@ -829,7 +883,7 @@ public class Host {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(message);
         } catch (IOException e) {
-            singleMessageWithoutBackUpCatch("backup+" + message, findBackupHostIndex(hostIndex));
+            singleMessageWithoutBackUpCatch("backup" + message, findBackupHostIndex(hostIndex));
             System.out.println("send message to backup!");
         }
     }
@@ -861,9 +915,8 @@ public class Host {
         // Try to connect to your backup
         try {
             singleMessageWithoutBackUpCatch("requestRecoverData-saveMePlease", findBackupHostIndex(yourName));
-            singleMessageWithoutBackUpCatch("pleaseUpdateYourBackUp-prettyPlease", findHostForBackUpYouHave(yourName));
         } catch (Exception e) {
-            System.out.println("communication with backup failed");
+//            System.out.println("communication with backup failed");
         }
 
     }

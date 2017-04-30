@@ -14,7 +14,6 @@ public class HostInfo {
     }
 
     public HostInfo(String hostInfo) {
-        System.out.println(hostInfo);
         String[] split = hostInfo.split(",");
         hostName = split[0];
         iPAddress = split[1];

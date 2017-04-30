@@ -29,6 +29,8 @@ public class TupleSpace {
         return tupleList.get(index);
     }
 
+    public void clear(){tupleList.clear();}
+
     /**
      * Returns the tuple that matches the input
      */
